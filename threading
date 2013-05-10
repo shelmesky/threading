@@ -96,7 +96,7 @@ is_alive()方法可以检查一个线程是否处于活动状态。
 线程有一个名字. 可以在构造方法中传递这个名字，然后可以通过线程的name属性来读取或者更改线程的名字。
 
 一个线程可以被标志为"daemon线程"。
-这个标志的意义是，当daemon线程退出之后，整个python进程才会退出，否则会等待daemon线程退出。
+这个标志的意义是，如果python进程退出，daemon线程会立刻退出，主进程不会等待daemon线程。
 初始化的值是通过继承thread对象得来的。
 这个标志可以通过线程的daemon属性设置。
 
@@ -176,4 +176,42 @@ isAlive()
 threading模块的enumerate()方法返回所有存活的线程列表.
 
 
+isDaemon()
+setDaemon()
+daemon属性的同名API。
+
+daemon
+一个布尔值，指出线程是daemon thread(True)或者不是False.
+必须在执行start()函数之前设置这个属性，否则会抛出RuntimeError错误。
+初始值是从thread模块继承。
+主线程不是一个daemon thread，而且主线程创建的所有线程默认都是daemon=False.
+
+当没有non-daemon线程存在的时候，python主进程才会退出。
+否则会等待non-daemon进程完成。
+
+
+
+Lock Objects
+原语锁是一个同步原语，它不被某个特定的线程拥有。
+在Python中，它是一个最低层的可用同步原语，从thread模块扩展而来。
+
+一个锁有两种状态，"locked"或者"unlocked".新创建的锁，默认是unlocked状态。
+它有两个基本的方法，acquire()和release().
+如果是unlocked状态，acquire()将锁变为locked状态并且acquire()函数立刻返回。
+如果锁的状态是locked，A线程中的acquire()会一直阻塞，直到在B线程中调用release()将锁变为unlocked，
+然后A线程中的acquire()函数会再次让锁变为locked状态，A线程中的acquire()会立刻返回。
+只有当锁是locked状态时，才能调用release()函数。
+release()函数会将锁变为unlocked状态，并立刻返回。
+如果在一个未锁定的锁上调用release函数，会抛出RuntimeError错误。
+
+当有不止一个线程在acquire()函数上阻塞并等待变为unlocked，当其他线程调用release()方法将锁变为unlocked状态后，
+只有一个线程中的acquire()会得到这把锁。
+至于哪个阻塞在acquire()上的线程会得到这把锁，要看具体的实现方式。
+
+Lock.acquire([blocking])
+以阻塞或者非阻塞的方式，获取一把锁。
+
+当参数blocking为True，当前线程会一直阻塞直到锁变为unlocked，然后acquire()方法会再次让锁变为locked状态，并返回True.
+
+当参数blocking为False时，不阻塞当前线程。
 
