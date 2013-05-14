@@ -215,3 +215,59 @@ Lock.acquire([blocking])
 
 当参数blocking为False时，不阻塞当前线程。
 
+Lock.release()
+释放一个锁。
+当锁处于locked状态，将其重置到unlocked状态，并返回。
+如果其他线程阻塞等待锁变为unlocked状态，只允许其中一个线程获取锁。
+当在一个unlocked的锁上执行release()，会抛出一个ThreadError错误。
+这个函数没有返回值。
+
+
+RLock Objects
+一个可重入的锁是一个同步原语，它允许同一个线程多次获取这个锁。
+在内部它采用了"owning thread"和"递归层级"的概念，达到locked/unlocked的状态。
+在locked状态，某个线程拥有锁。
+在unlocked状态，没有线程拥有这把锁。
+
+一个线程调用可重入锁的acquire()方法，来锁定一个锁；
+当线程获取到了这个锁，acquire()方法立刻返回。
+要释放一个锁，一个线程调用release()方法。
+acquire()/release()成对的出现，并支持调套调用。
+只有最后的一个release() (最外层的release())将锁变为unlocked状态，
+并且允许其他阻塞在acquire()的线程继续处理。
+
+RLock.acquire([blocking=1])
+以阻塞或者非阻塞的方式，获取一个锁。
+
+当不带任何参数调用：如果当前线程已经拥有这把锁，会将递归层级增加一层，并且立刻返回。
+否则，当其他线程拥有这把锁，acquire()会阻塞，直到锁变为unlockded.
+当锁处于unlocked状态(没有任何线程拥有这把锁)时，获取到这把锁，设置递归层级为1，并返回。
+如果有多个线程阻塞并等待锁变为unlocked状态，在任何时刻只有一个线程会获得这把锁。
+这个函数没有任何返回值。
+
+当调用时将blocking参数设置为true，和不带任何参数调用一样，并返回true.
+
+当调用时将blocking参数设置为false， 不阻塞当前线程。
+
+
+RLock.release()
+释放锁，减少递归层级。
+如果减少之后递归层级是0，重置锁为unlocked状态(不被其他线程拥有)，如果其他线程阻塞等待
+锁变为unlocked，只允许其中一个线程继续处理。 
+如果减少递归层级之后，依然的非0，则锁依然是locked状态，并且为调用线程所拥有。
+
+当只有当前线程拥有这把锁时，才会调用此方法。
+当锁处于unlocked状态时，调用此方法会抛出RuntimeError错误。
+
+
+
+Condition Objects
+一个条件变量总是和某种锁关联使用；
+锁可以传递给条件变量，否则默认会创建一个。
+当想要多个条件变量共享同一把锁的时候，传递一个锁给条件变量就很有用。
+
+条件变量有acquire()和release()方法，等于调用的是锁的方法。
+它还有一个wait()方法和notify()方法和notifyAll()方法。
+只有当线程获取了传递给Condition的锁时，才能调用这3个方法，否则会抛出RuntimeError错误。
+
+wait()方法释放锁，并且
